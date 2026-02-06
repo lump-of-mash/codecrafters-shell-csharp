@@ -7,13 +7,21 @@ class Program
             Console.Write("$ ");
 
             string? command = Console.ReadLine();
+            string[] commandSplit = command.Split(" ");
 
-            if(command == "exit")
+            switch (commandSplit[0])
             {
-                break;
+                case "exit":
+                    return;
+                case "echo":
+                    
+                    System.Console.WriteLine(string.Join(" ", commandSplit[1..]));
+                    break;
+                default:
+                    System.Console.WriteLine($"{command}: command not found");
+                    break;
             }
 
-            System.Console.WriteLine($"{command}: command not found");
         }
     }
 }
