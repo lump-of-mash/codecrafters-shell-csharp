@@ -18,8 +18,8 @@ class Program
                     System.Console.WriteLine(string.Join(" ", commandSplit[1..]));
                     break;
                 case "type":
-                    string message = commandSplit[1] + ": ";
-                    message += builtinCommands.Contains(commandSplit[1]) ? "is a shell builtin" : "not found";
+                    string message = commandSplit[1];
+                    message += builtinCommands.Contains(commandSplit[1]) ? " is a shell builtin" : " not found";
                     System.Console.WriteLine(message);
                     break;
                 default:
