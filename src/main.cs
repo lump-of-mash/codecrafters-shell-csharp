@@ -12,7 +12,7 @@ class Program
             string? command = Console.ReadLine();
             if(string.IsNullOrEmpty(command)) continue;
 
-            string[] commandSplit = command.Split(" ");
+            string[] commandSplit = ParseInput(command);
 
             switch (commandSplit[0])
             {
@@ -30,5 +30,17 @@ class Program
             }
 
         }
+    }
+
+    static string[] ParseInput(string input)
+    {
+        var parsedInput = input.Trim().Split(" ");
+
+        for (int i = 0; i < parsedInput.Length; i++)
+        {
+            parsedInput[i] = parsedInput[i].Replace("\'", "");
+        }
+        
+        return parsedInput;
     }
 }
