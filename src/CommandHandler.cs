@@ -25,7 +25,7 @@ internal class CommandHandler
 
             if (!string.IsNullOrEmpty(path))
             {
-                foreach (var dir in path.Split(';'))
+                foreach (var dir in path.Split(Path.PathSeparator))
                 {
                     try
                     {
