@@ -21,7 +21,8 @@ internal class CommandHandler
         }
         else
         {
-            string? path = Environment.GetEnvironmentVariable("Path");
+            string pathVariableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Path" : "PATH";
+            string? path = Environment.GetEnvironmentVariable(pathVariableName);
 
             if (!string.IsNullOrEmpty(path))
             {
