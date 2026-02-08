@@ -11,7 +11,7 @@ class Program
 
             string? command = Console.ReadLine();
             if(string.IsNullOrEmpty(command)) continue;
-            
+
             string[] commandSplit = command.Split(" ");
 
             switch (commandSplit[0])
@@ -25,11 +25,7 @@ class Program
                     commandHandler.TypeCommand(commandSplit, builtinCommands);
                     break;
                 default:
-                    if(string.IsNullOrEmpty(commandSplit[0]))
-                        System.Console.WriteLine($"{command}: command not found");
-                    else
-                        commandHandler.ExecuteCommand(commandSplit);
-
+                    commandHandler.ExecuteCommand(commandSplit);
                     break;
             }
 

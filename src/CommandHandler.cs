@@ -4,16 +4,20 @@ using System.Runtime.InteropServices;
 
 internal class CommandHandler
 {
-    internal void ExecuteCommand(string[] arguments)
+    internal bool ExecuteCommand(string[] arguments)
     {
         var fileName = arguments[0];
         var filePath = CheckPathFileIsExecutable(fileName);
-        if(filePath == null) return;
+        if(filePath == null)
+        {
+            System.Console.WriteLine($"{fileName}: command not found");
+            return false;
+        }
 
         var psi = new ProcessStartInfo
         {
             FileName = filePath,
-            UseShellExecute = false
+            UseShellExecute = true
         };
 
         foreach (var arg in arguments[1..])
@@ -21,6 +25,7 @@ internal class CommandHandler
         
         var process = Process.Start(psi);
         process?.WaitForExit();
+        return true;
     }
 
     private string? CheckPathFileIsExecutable(string fileName)
