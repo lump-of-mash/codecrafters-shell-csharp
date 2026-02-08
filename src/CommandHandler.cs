@@ -13,18 +13,8 @@ internal class CommandHandler
             System.Console.WriteLine($"{fileName}: command not found");
             return false;
         }
-
-        var psi = new ProcessStartInfo
-        {
-            FileName = fileName,
-            UseShellExecute = false
-        };
-
-        foreach (var arg in arguments[1..])
-            psi.ArgumentList.Add(arg);
         
-        var process = Process.Start(psi);
-        process?.WaitForExit();
+        Process.Start(fileName, string.Join(" ", arguments[1..])).WaitForExit();
         return true;
     }
 
