@@ -29,9 +29,4 @@ class Program
 
         }
     }
-
-    private void Type(string[] command)
-    {
-        
-    } 
 }

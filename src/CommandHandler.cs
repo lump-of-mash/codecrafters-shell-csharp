@@ -3,15 +3,15 @@ using System.Runtime.InteropServices;
 
 internal class CommandHandler
 {
-    internal void Type(string[] command, string[] builtinCommands)
+    internal void Type(string[] arguments, string[] builtinCommands)
     {
-        if (command.Length < 2)
+        if (arguments.Length < 2)
         {
             System.Console.WriteLine($" not found");
             return;
         }
 
-        string fileName = command[1];
+        string fileName = arguments[1];
         string? message = "";
 
 
@@ -22,28 +22,16 @@ internal class CommandHandler
         else
         {
             string pathVariableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Path" : "PATH";
-            string? path = Environment.GetEnvironmentVariable(pathVariableName);
+            string? path = Environment.GetEnvironmentVariable(pathVariableName) ?? string.Empty;
 
-            if (!string.IsNullOrEmpty(path))
+            foreach (var dir in path.Split(Path.PathSeparator))
             {
-                foreach (var dir in path.Split(Path.PathSeparator))
+                var filePath = Path.Combine(dir, fileName);
+
+                if (File.Exists(filePath) && IsExecutable(filePath))
                 {
-                    try
-                    {
-                        var dirFiles = Directory.GetFiles(dir);
-                    }
-                    catch (DirectoryNotFoundException)
-                    {
-                        continue;
-                    }
-
-                    var filePath = Path.Combine(dir, fileName);
-
-                    if (File.Exists(filePath) && IsExecutable(filePath))
-                    {
-                        message = $"{fileName} is {filePath}";
-                        break;
-                    }
+                    message = $"{fileName} is {filePath}";
+                    break;
                 }
             }
         }
