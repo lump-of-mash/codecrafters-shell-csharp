@@ -1,9 +1,59 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 internal class CommandHandler
 {
-    internal void Type(string[] arguments, string[] builtinCommands)
+    internal void ExecuteCommand(string[] arguments)
+    {
+        var fileName = arguments[0];
+        var filePath = CheckPathFileIsExecutable(fileName);
+        if(filePath == null) return;
+
+        var psi = new ProcessStartInfo
+        {
+            FileName = filePath,
+            Arguments = arguments.Length > 1 ? arguments[1..].ToString() : string.Empty,
+            UseShellExecute = false
+        };
+
+        var process = Process.Start(psi);
+        process?.WaitForExit();
+    }
+
+    private string? CheckPathFileIsExecutable(string fileName)
+    {
+        string pathVariableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Path" : "PATH";
+        string? path = Environment.GetEnvironmentVariable(pathVariableName) ?? string.Empty;
+
+        foreach (var dir in path.Split(Path.PathSeparator))
+        {
+            var filePath = Path.Combine(dir, fileName);
+
+            if (File.Exists(filePath) && IsExecutable(filePath))
+                return filePath;
+        }
+
+        return null;
+
+        static bool IsExecutable(string path)
+        {
+            if (!File.Exists(path)) return false;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                string ext = Path.GetExtension(path).ToLowerInvariant();
+                return ext is ".exe" or ".bat" or ".cmd" or ".com";
+            }
+            else
+            {
+                var mode = File.GetUnixFileMode(path);
+                return (mode & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) != 0;
+            }
+        }
+    }
+
+    internal void TypeCommand(string[] arguments, string[] builtinCommands)
     {
         if (arguments.Length < 2)
         {
@@ -21,41 +71,14 @@ internal class CommandHandler
         }
         else
         {
-            string pathVariableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Path" : "PATH";
-            string? path = Environment.GetEnvironmentVariable(pathVariableName) ?? string.Empty;
+            var filePath = CheckPathFileIsExecutable(fileName);
 
-            foreach (var dir in path.Split(Path.PathSeparator))
-            {
-                var filePath = Path.Combine(dir, fileName);
-
-                if (File.Exists(filePath) && IsExecutable(filePath))
-                {
-                    message = $"{fileName} is {filePath}";
-                    break;
-                }
-            }
+            if (!string.IsNullOrEmpty(filePath))
+                message = $"{fileName} is {filePath}";
         }
 
         if (string.IsNullOrEmpty(message)) message = $"{fileName}: not found";
 
         System.Console.WriteLine(message);
-
-
-        bool IsExecutable(string path)
-        {
-            if (!File.Exists(path)) return false;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                string ext = Path.GetExtension(path).ToLowerInvariant();
-                return ext is ".exe" or ".bat" or ".cmd" or ".com";
-            }
-            else
-            {
-                var mode = File.GetUnixFileMode(path);
-                return (mode & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) != 0;
-            }
-        }
-
     }
 }

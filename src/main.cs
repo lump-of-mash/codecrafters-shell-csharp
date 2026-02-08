@@ -10,6 +10,8 @@ class Program
             Console.Write("$ ");
 
             string? command = Console.ReadLine();
+            if(string.IsNullOrEmpty(command)) continue;
+            
             string[] commandSplit = command.Split(" ");
 
             switch (commandSplit[0])
@@ -20,10 +22,14 @@ class Program
                     System.Console.WriteLine(string.Join(" ", commandSplit[1..]));
                     break;
                 case "type":
-                    commandHandler.Type(commandSplit, builtinCommands);
+                    commandHandler.TypeCommand(commandSplit, builtinCommands);
                     break;
                 default:
-                    System.Console.WriteLine($"{command}: command not found");
+                    if(string.IsNullOrEmpty(commandSplit[0]))
+                        System.Console.WriteLine($"{command}: command not found");
+                    else
+                        commandHandler.ExecuteCommand(commandSplit);
+
                     break;
             }
 
