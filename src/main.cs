@@ -2,6 +2,8 @@ class Program
 {
     static void Main()
     {
+        CommandHandler commandHandler = new();
+
         string[] builtinCommands = ["echo", "exit", "type"];
         while (true)
         {
@@ -18,9 +20,7 @@ class Program
                     System.Console.WriteLine(string.Join(" ", commandSplit[1..]));
                     break;
                 case "type":
-                    string message = commandSplit[1];
-                    message += builtinCommands.Contains(commandSplit[1]) ? " is a shell builtin" : " not found";
-                    System.Console.WriteLine(message);
+                    commandHandler.Type(commandSplit, builtinCommands);
                     break;
                 default:
                     System.Console.WriteLine($"{command}: command not found");
@@ -29,4 +29,9 @@ class Program
 
         }
     }
+
+    private void Type(string[] command)
+    {
+        
+    } 
 }
