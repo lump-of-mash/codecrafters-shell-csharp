@@ -5,10 +5,17 @@ internal class CommandHandler
 {
     internal void Type(string[] command, string[] builtinCommands)
     {
+        if(command.Length < 2)
+        {
+            System.Console.WriteLine($" not found");
+            return;
+        }
+
         string fileName = command[1];
         string? message = "";
 
-        if (builtinCommands.Contains(fileName))
+
+        if (fileName != null && builtinCommands.Contains(fileName))
         {
             message = $"{fileName} is a shell builtin";
         }
