@@ -5,7 +5,7 @@ internal class CommandHandler
 {
     internal void Type(string[] command, string[] builtinCommands)
     {
-        if(command.Length < 2)
+        if (command.Length < 2)
         {
             System.Console.WriteLine($" not found");
             return;
@@ -15,7 +15,7 @@ internal class CommandHandler
         string? message = "";
 
 
-        if (fileName != null && builtinCommands.Contains(fileName))
+        if (builtinCommands.Contains(fileName))
         {
             message = $"{fileName} is a shell builtin";
         }
@@ -23,28 +23,31 @@ internal class CommandHandler
         {
             string? path = Environment.GetEnvironmentVariable("Path");
 
-            foreach (var dir in path.Split(';'))
+            if (!string.IsNullOrEmpty(path))
             {
-                try
+                foreach (var dir in path.Split(';'))
                 {
-                    var dirFiles = Directory.GetFiles(dir);
-                }
-                catch (DirectoryNotFoundException)
-                {
-                    continue;
-                }
-                
-                var filePath = Path.Combine(dir, fileName);
+                    try
+                    {
+                        var dirFiles = Directory.GetFiles(dir);
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+                        continue;
+                    }
 
-                if (File.Exists(filePath) && IsExecutable(filePath))
-                {
-                    message = $"{fileName} is {filePath}";
-                    break;
+                    var filePath = Path.Combine(dir, fileName);
+
+                    if (File.Exists(filePath) && IsExecutable(filePath))
+                    {
+                        message = $"{fileName} is {filePath}";
+                        break;
+                    }
                 }
             }
         }
 
-        if (message == "") message = $"{fileName}: not found";
+        if (string.IsNullOrEmpty(message)) message = $"{fileName}: not found";
 
         System.Console.WriteLine(message);
 
