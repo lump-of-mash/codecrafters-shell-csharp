@@ -13,10 +13,12 @@ internal class CommandHandler
         var psi = new ProcessStartInfo
         {
             FileName = filePath,
-            Arguments = arguments.Length > 1 ? arguments[1..].ToString() : string.Empty,
             UseShellExecute = false
         };
 
+        foreach (var arg in arguments[1..])
+            psi.ArgumentList.Add(arg);
+        
         var process = Process.Start(psi);
         process?.WaitForExit();
     }
