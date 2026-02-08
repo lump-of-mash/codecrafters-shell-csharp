@@ -38,9 +38,9 @@ class Program
 
         for (int i = 0; i < parsedInput.Length; i++)
         {
-            parsedInput[i] = parsedInput[i].Replace("\'", "");
+            parsedInput[i] = parsedInput[i].Trim().Replace("\'", "");
         }
-        
+
         return parsedInput;
     }
 }
