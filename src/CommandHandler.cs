@@ -16,8 +16,8 @@ internal class CommandHandler
 
         var psi = new ProcessStartInfo
         {
-            FileName = filePath,
-            UseShellExecute = true
+            FileName = fileName,
+            UseShellExecute = false
         };
 
         foreach (var arg in arguments[1..])
