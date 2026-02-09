@@ -6,6 +6,10 @@ internal class CommandHandler
 {
     internal bool ExecuteCommand(string[] arguments)
     {
+        foreach(var arg in arguments)
+        {
+            System.Console.WriteLine(arg);
+        }
         var fileName = arguments[0];
         var filePath = CheckPathFileIsExecutable(fileName);
         if(filePath == null)
