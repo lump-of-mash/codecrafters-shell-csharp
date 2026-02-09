@@ -34,11 +34,11 @@ class Program
 
     static string[] ParseInput(string input)
     {
-        var parsedInput = input.Trim().Split(" ");
+        var parsedInput = input.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
         for (int i = 0; i < parsedInput.Length; i++)
         {
-            parsedInput[i] = parsedInput[i].Trim().Replace("\'", "");
+            parsedInput[i] = parsedInput[i].Replace("\'", "");
         }
 
         return parsedInput;
