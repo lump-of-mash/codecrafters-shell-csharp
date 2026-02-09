@@ -6,10 +6,6 @@ internal class CommandHandler
 {
     internal bool ExecuteCommand(string[] arguments)
     {
-        foreach(var arg in arguments)
-        {
-            System.Console.WriteLine(arg);
-        }
         var fileName = arguments[0];
         var filePath = CheckPathFileIsExecutable(fileName);
         if(filePath == null)
@@ -18,7 +14,7 @@ internal class CommandHandler
             return false;
         }
         
-        Process.Start(fileName, string.Join(" ", arguments[1..])).WaitForExit();
+        Process.Start(fileName, arguments[1..]).WaitForExit();
         return true;
     }
 
