@@ -1,3 +1,5 @@
+using System.Globalization;
+
 class Program
 {
     static void Main()
@@ -10,37 +12,75 @@ class Program
             Console.Write("$ ");
 
             string? command = Console.ReadLine();
-            if(string.IsNullOrEmpty(command)) continue;
+            if (string.IsNullOrEmpty(command)) continue;
 
-            string[] commandSplit = ParseInput(command);
+            List<string> arguments = ParseInput(command);
 
-            switch (commandSplit[0])
+            switch (arguments[0])
             {
                 case "exit":
                     return;
                 case "echo":
-                    System.Console.WriteLine(string.Join(" ", commandSplit[1..]));
+                    System.Console.WriteLine(string.Join(" ", arguments[1..]));
                     break;
                 case "type":
-                    commandHandler.TypeCommand(commandSplit, builtinCommands);
+                    commandHandler.TypeCommand(arguments.ToArray(), builtinCommands);
                     break;
                 default:
-                    commandHandler.ExecuteCommand(commandSplit);
+                    commandHandler.ExecuteCommand(arguments.ToArray());
                     break;
             }
 
         }
     }
 
-    static string[] ParseInput(string input)
+    static List<string> ParseInput(string input)
     {
-        var parsedInput = input.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries);
+        List<string> arguments = new();
 
-        for (int i = 0; i < parsedInput.Length; i++)
+        var parsedInput = input.Trim();
+
+        bool newArgument;
+        string argument;
+        int l = 0;
+        for (int r = 0; r < parsedInput.Length; r++)
         {
-            parsedInput[i] = parsedInput[i].Replace("\'", "");
+            newArgument = false;
+
+            if (parsedInput[r] == ' ' && parsedInput[l] != '\'')
+            {
+                newArgument = true;
+            }
+            else if (parsedInput[r] == '\'')
+            {
+                if (r + 1 < parsedInput.Length && parsedInput[r + 1] == '\'')
+                    r++;
+                else if (parsedInput[l] == '\'')
+                    newArgument = true;
+            }
+
+            if (newArgument)
+            {
+                argument = parsedInput[(parsedInput[l] == '\'' ? l + 1 : l)..r];
+                arguments.Add(argument);
+                l = r + 1;
+                while (l + 1 < parsedInput.Length && parsedInput[l] == ' ')
+                {
+                    l++;
+                }
+                r = l;
+            }
+        }
+        if (l < parsedInput.Length)
+        {
+            arguments.Add(parsedInput[l..parsedInput.Length].Trim());
         }
 
-        return parsedInput;
+        for (int i = 0; i < arguments.Count; i++)
+        {
+            arguments[i] = arguments[i].Replace("\'", "");
+        }
+
+        return arguments;
     }
 }
