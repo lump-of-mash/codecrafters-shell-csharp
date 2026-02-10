@@ -40,39 +40,30 @@ class Program
 
         var parsedInput = input.Trim();
 
-        bool newArgument;
-        string argument;
-        int l = 0;
-
-        bool inSingleQuotes = false; 
-        for (int r = 0; r < parsedInput.Length; r++)
+        bool inSingleQuotes = false;
+        string currentArgument = string.Empty;
+        foreach (var currentChar in parsedInput)
         {
-            var currentChar = parsedInput[r];
-
-            if(currentChar == '\'')
-                inSingleQuotes = !inSingleQuotes;
-
-            if(currentChar == ' ' && !inSingleQuotes)
+            if (currentChar == '\'')
             {
-                arguments.Add(parsedInput[l..r]);
-                l = r + 1;
-                while(l + 1 < parsedInput.Length && parsedInput[l] == ' ')
+                inSingleQuotes = !inSingleQuotes;
+                continue;
+            }
+
+            if (currentChar == ' ' && !inSingleQuotes)
+            {
+                if (currentArgument.Length > 0)
                 {
-                    l++;
-                    r++;
+                    arguments.Add(currentArgument);
+                    currentArgument = string.Empty;
                 }
             }
+            else
+            {
+                currentArgument += currentChar;
+            }
         }
-
-        if (l < parsedInput.Length)
-        {
-            arguments.Add(parsedInput[l..parsedInput.Length].Trim());
-        }
-
-        for (int i = 0; i < arguments.Count; i++)
-        {
-            arguments[i] = arguments[i].Replace("\'", "");
-        }
+        if (currentArgument.Length > 0) arguments.Add(currentArgument);
 
         return arguments;
     }
