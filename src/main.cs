@@ -37,12 +37,12 @@ class Program
     static List<string> ParseInput(string input)
     {
         List<string> arguments = new();
-
-        var parsedInput = input.Trim();
+        
+        if(string.IsNullOrWhiteSpace(input)) return arguments;
 
         bool inSingleQuotes = false;
         string currentArgument = string.Empty;
-        foreach (var currentChar in parsedInput)
+        foreach (var currentChar in input)
         {
             if (currentChar == '\'')
             {
