@@ -43,8 +43,22 @@ class Program
         bool inSingleQuotes = false;
         bool inDoubleQuotes = false;
         string currentArgument = string.Empty;
+        bool blackslashEscape = false;
         foreach (var currentChar in input)
         {
+            if(blackslashEscape)
+            {
+                currentArgument += currentChar;
+                blackslashEscape = false;
+                continue;                
+            }
+
+            if(currentChar == '\\')
+            {
+                blackslashEscape = true;
+                continue;
+            }
+
             if (currentChar == '\'' && !inDoubleQuotes)
             {
                 inSingleQuotes = !inSingleQuotes;
