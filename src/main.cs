@@ -43,34 +43,27 @@ class Program
         bool newArgument;
         string argument;
         int l = 0;
+
+        bool inSingleQuotes = false; 
         for (int r = 0; r < parsedInput.Length; r++)
         {
-            newArgument = false;
+            var currentChar = parsedInput[r];
 
-            if (parsedInput[r] == ' ' && parsedInput[l] != '\'')
-            {
-                newArgument = true;
-            }
-            else if (parsedInput[r] == '\'')
-            {
-                if (r + 1 < parsedInput.Length && parsedInput[r + 1] == '\'')
-                    r++;
-                else if (parsedInput[l] == '\'')
-                    newArgument = true;
-            }
+            if(currentChar == '\'')
+                inSingleQuotes = !inSingleQuotes;
 
-            if (newArgument)
+            if(currentChar == ' ' && !inSingleQuotes)
             {
-                argument = parsedInput[(parsedInput[l] == '\'' ? l + 1 : l)..r];
-                arguments.Add(argument);
+                arguments.Add(parsedInput[l..r]);
                 l = r + 1;
-                while (l + 1 < parsedInput.Length && parsedInput[l] == ' ')
+                while(l + 1 < parsedInput.Length && parsedInput[l] == ' ')
                 {
                     l++;
+                    r++;
                 }
-                r = l;
             }
         }
+
         if (l < parsedInput.Length)
         {
             arguments.Add(parsedInput[l..parsedInput.Length].Trim());
