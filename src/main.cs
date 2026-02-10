@@ -37,20 +37,27 @@ class Program
     static List<string> ParseInput(string input)
     {
         List<string> arguments = new();
-        
+
         if(string.IsNullOrWhiteSpace(input)) return arguments;
 
         bool inSingleQuotes = false;
+        bool inDoubleQuotes = false;
         string currentArgument = string.Empty;
         foreach (var currentChar in input)
         {
-            if (currentChar == '\'')
+            if (currentChar == '\'' && !inDoubleQuotes)
             {
                 inSingleQuotes = !inSingleQuotes;
                 continue;
             }
 
-            if (currentChar == ' ' && !inSingleQuotes)
+            if (currentChar == '\"' && !inSingleQuotes)
+            {
+                inDoubleQuotes = !inDoubleQuotes;
+                continue;
+            }
+
+            if (currentChar == ' ' && !inSingleQuotes && !inDoubleQuotes)
             {
                 if (currentArgument.Length > 0)
                 {
