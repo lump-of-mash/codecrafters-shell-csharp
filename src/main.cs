@@ -46,6 +46,19 @@ class Program
         bool blackslashEscape = false;
         foreach (var currentChar in input)
         {
+            if(blackslashEscape)
+            {
+                currentArgument += currentChar;
+                blackslashEscape = false;
+                continue;                
+            }
+
+            if(currentChar == '\\' && !inSingleQuotes && !inDoubleQuotes)
+            {
+                blackslashEscape = true;
+                continue;
+            }
+
             if (currentChar == '\'' && !inDoubleQuotes)
             {
                 inSingleQuotes = !inSingleQuotes;
@@ -55,19 +68,6 @@ class Program
             if (currentChar == '\"' && !inSingleQuotes)
             {
                 inDoubleQuotes = !inDoubleQuotes;
-                continue;
-            }
-
-            if(blackslashEscape)
-            {
-                currentArgument += currentChar;
-                blackslashEscape = false;
-                continue;                
-            }
-
-            if(currentChar == '\\')
-            {
-                blackslashEscape = true;
                 continue;
             }
 
