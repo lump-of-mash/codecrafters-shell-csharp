@@ -48,12 +48,16 @@ class Program
         {
             if(blackslashEscape)
             {
-                currentArgument += currentChar;
+                if(inDoubleQuotes && !(currentChar is '\"' or '\\' or '$' or '`' or '\n'))
+                    currentArgument += "\\" + currentChar;
+                else
+                    currentArgument += currentChar;
+
                 blackslashEscape = false;
                 continue;                
             }
 
-            if(currentChar == '\\' && !inSingleQuotes && !inDoubleQuotes)
+            if(currentChar == '\\' && !inSingleQuotes)
             {
                 blackslashEscape = true;
                 continue;
