@@ -36,7 +36,7 @@ class Program
 
     static List<string> ParseInput(string input)
     {
-        List<string> arguments = new();
+        List<string> arguments = [];
 
         if(string.IsNullOrWhiteSpace(input)) return arguments;
 
