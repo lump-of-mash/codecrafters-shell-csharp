@@ -52,13 +52,16 @@ class Program
 
     private static bool CheckForRedirect(List<string> arguments, out string redirectPath)
     {
-        if (arguments.Contains(">"))
+        for (int i = 1; i < arguments.Count - 1; i++)
         {
-            var redirectIndex = arguments.IndexOf(">");
-            redirectPath = arguments[redirectIndex + 1];
-            arguments.RemoveRange(redirectIndex, arguments.Count - redirectIndex);
-            return true;
+            if (arguments[i] is ">" or "1>")
+            {
+                redirectPath = arguments[i + 1];
+                arguments.RemoveRange(i, arguments.Count - i);
+                return true;
+            }
         }
+        
         redirectPath = string.Empty;
         return false;
     }
