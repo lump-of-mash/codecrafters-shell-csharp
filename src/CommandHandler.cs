@@ -18,15 +18,17 @@ internal class CommandHandler
             StartInfo = new ProcessStartInfo
             {
             FileName = filePath,
-            Arguments = string.Join(" ", arguments[1..]),
-            RedirectStandardOutput = true,
-            UseShellExecute = false
+            UseShellExecute = false,
+            RedirectStandardOutput = true
             }
         };
+        foreach (var arg in arguments[1..])
+        {
+            process.StartInfo.ArgumentList.Add(arg);
+        }
         process.Start();
         var output = process.StandardOutput.ReadToEnd();
         process.WaitForExit();
-        
         return output;
     }
 
