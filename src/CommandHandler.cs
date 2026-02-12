@@ -13,8 +13,20 @@ internal class CommandHandler
             return $"{fileName}: command not found";
         }
         
-        Process.Start(fileName, arguments[1..]).WaitForExit();
-        return string.Empty;
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+            FileName = filePath,
+            Arguments = string.Join(" ", arguments[1..]),
+            RedirectStandardOutput = true,
+            UseShellExecute = false
+            }
+        };
+        process.Start();
+        var output = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+        return output;
     }
 
     private string? CheckPathFileIsExecutable(string fileName)
