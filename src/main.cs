@@ -47,7 +47,7 @@ class Program
         if (redirectOutput)
             File.WriteAllText(redirectPath, commandOutput);
         else
-            System.Console.WriteLine(commandOutput);
+            System.Console.WriteLine(commandOutput.TrimEnd('\n'));
     }
 
     private static bool CheckForRedirect(List<string> arguments, out string redirectPath)
