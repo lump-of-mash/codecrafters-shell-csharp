@@ -4,18 +4,17 @@ using System.Runtime.InteropServices;
 
 internal class CommandHandler
 {
-    internal bool ExecuteCommand(string[] arguments)
+    internal string ExecuteCommand(string[] arguments)
     {
         var fileName = arguments[0];
         var filePath = CheckPathFileIsExecutable(fileName);
         if(filePath == null)
         {
-            System.Console.WriteLine($"{fileName}: command not found");
-            return false;
+            return $"{fileName}: command not found";
         }
         
         Process.Start(fileName, arguments[1..]).WaitForExit();
-        return true;
+        return string.Empty;
     }
 
     private string? CheckPathFileIsExecutable(string fileName)
@@ -50,12 +49,11 @@ internal class CommandHandler
         }
     }
 
-    internal void TypeCommand(string[] arguments, string[] builtinCommands)
+    internal string TypeCommand(string[] arguments, string[] builtinCommands)
     {
         if (arguments.Length < 2)
         {
-            System.Console.WriteLine($" not found");
-            return;
+            return $" not found";
         }
 
         string fileName = arguments[1];
@@ -64,7 +62,7 @@ internal class CommandHandler
 
         if (builtinCommands.Contains(fileName))
         {
-            message = $"{fileName} is a shell builtin";
+            return $"{fileName} is a shell builtin";
         }
         else
         {
@@ -76,6 +74,6 @@ internal class CommandHandler
 
         if (string.IsNullOrEmpty(message)) message = $"{fileName}: not found";
 
-        System.Console.WriteLine(message);
+        return message;
     }
 }
