@@ -17,7 +17,7 @@ internal class CommandHandler
         {
             StartInfo = new ProcessStartInfo
             {
-            FileName = filePath,
+            FileName = fileName,
             UseShellExecute = false,
             RedirectStandardOutput = true
             }
