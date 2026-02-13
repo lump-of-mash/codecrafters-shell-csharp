@@ -7,6 +7,8 @@ class Program
         CommandHandler commandHandler = new();
 
         string[] builtinCommands = ["echo", "exit", "type"];
+        string[] standardRedirectOperators = [">", "1>"];
+        string[] errorRedirectOperators = ["2>"];
         while (true)
         {
             Console.Write("$ ");
@@ -16,7 +18,8 @@ class Program
 
             List<string> arguments = ParseInput(command);
 
-            bool redirectOutput = CheckForRedirect(arguments, out string redirectPath);
+            bool redirectStandardOutput = CheckForRedirect(arguments, standardRedirectOperators, out string standardRedirectPath);
+            bool redirectErrorOutput    = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
 
             string commandOutput = string.Empty;
             switch (arguments[0])
@@ -25,15 +28,15 @@ class Program
                     return;
                 case "echo":
                     commandOutput = string.Join(" ", arguments[1..]);
-                    OutputCommand(commandOutput, redirectOutput, redirectPath);
+                    OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
                     break;
                 case "type":
                     commandOutput = commandHandler.TypeCommand(arguments.ToArray(), builtinCommands);
-                    OutputCommand(commandOutput, redirectOutput, redirectPath);
+                    OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
                     break;
                 default:
-                    commandOutput = commandHandler.ExecuteCommand(arguments.ToArray());
-                    OutputCommand(commandOutput, redirectOutput, redirectPath);
+                    commandOutput = commandHandler.ExecuteCommand(arguments.ToArray(), redirectErrorOutput, errordRedirectPath);
+                    OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
                     break;
             }
 
@@ -50,18 +53,18 @@ class Program
             System.Console.WriteLine(commandOutput.TrimEnd('\n'));
     }
 
-    private static bool CheckForRedirect(List<string> arguments, out string redirectPath)
+    private static bool CheckForRedirect(List<string> arguments, string[] redirectOperators, out string redirectPath)
     {
         for (int i = 1; i < arguments.Count - 1; i++)
         {
-            if (arguments[i] is ">" or "1>")
+            if (redirectOperators.Contains(arguments[i]))
             {
                 redirectPath = arguments[i + 1];
                 arguments.RemoveRange(i, arguments.Count - i);
                 return true;
             }
         }
-        
+
         redirectPath = string.Empty;
         return false;
     }

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 internal class CommandHandler
 {
-    internal string ExecuteCommand(string[] arguments)
+    internal string ExecuteCommand(string[] arguments, bool errorRedirectOutput, string errordRedirectPath)
     {
         var fileName = arguments[0];
         var filePath = CheckPathFileIsExecutable(fileName);
@@ -19,7 +19,8 @@ internal class CommandHandler
             {
             FileName = fileName,
             UseShellExecute = false,
-            RedirectStandardOutput = true
+            RedirectStandardOutput = true,
+            RedirectStandardError = errorRedirectOutput
             }
         };
         foreach (var arg in arguments[1..])
@@ -27,7 +28,12 @@ internal class CommandHandler
             process.StartInfo.ArgumentList.Add(arg);
         }
         process.Start();
+        
         var output = process.StandardOutput.ReadToEnd();
+
+        if(errorRedirectOutput) 
+            File.WriteAllText(errordRedirectPath, process.StandardError.ReadToEnd());
+
         process.WaitForExit();
         return output;
     }
