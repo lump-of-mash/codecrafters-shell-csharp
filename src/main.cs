@@ -61,7 +61,7 @@ class Program
             {
                 redirectPath = arguments[i + 1];
                 arguments.RemoveRange(i, arguments.Count - i);
-                File.Create(redirectPath);
+                File.WriteAllText(redirectPath, null);
                 return true;
             }
         }
