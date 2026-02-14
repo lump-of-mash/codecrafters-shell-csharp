@@ -34,7 +34,7 @@ class Program
                     commandOutput = string.Join(" ", arguments[1..]);
 
                     if(appendStandardOutput) 
-                        File.AppendAllText(appendRedirectPath, commandOutput);
+                        File.AppendAllText(appendRedirectPath, commandOutput + "\n");
                     else 
                         OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
 
@@ -43,7 +43,7 @@ class Program
                     commandOutput = commandHandler.TypeCommand(arguments.ToArray(), builtinCommands);
 
                     if(appendStandardOutput) 
-                        File.AppendAllText(appendRedirectPath, commandOutput);
+                        File.AppendAllText(appendRedirectPath, commandOutput + "\n");
                     else 
                         OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
 
@@ -52,7 +52,7 @@ class Program
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
 
                     if(appendStandardOutput) 
-                        File.AppendAllText(appendRedirectPath, commandOutput);
+                        File.AppendAllText(appendRedirectPath, commandOutput + "\n");
                     else 
                         OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
 
