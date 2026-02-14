@@ -8,19 +8,19 @@ internal class CommandHandler
     {
         var fileName = arguments[0];
         var filePath = CheckPathFileIsExecutable(fileName);
-        if(filePath == null)
+        if (filePath == null)
         {
             return ($"{fileName}: command not found", string.Empty);
         }
-        
+
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-            FileName = fileName,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
+                FileName = fileName,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             }
         };
         foreach (var arg in arguments[1..])
@@ -28,7 +28,7 @@ internal class CommandHandler
             process.StartInfo.ArgumentList.Add(arg);
         }
         process.Start();
-        
+
         var output = process.StandardOutput.ReadToEnd();
         var error = process.StandardError.ReadToEnd();
 
@@ -94,5 +94,21 @@ internal class CommandHandler
         if (string.IsNullOrEmpty(message)) message = $"{fileName}: not found";
 
         return message;
+    }
+
+    internal static string CDCommand(List<string> arguments)
+    {
+        var directory = string.Empty;
+        var output = string.Empty;
+
+        if (arguments.Count > 1)
+            directory = arguments[1];
+
+        if (Directory.Exists(directory))
+            Directory.SetCurrentDirectory(directory);
+        else
+            output = $"cd: {directory}: No such file or directory";
+
+        return output;
     }
 }

@@ -8,7 +8,7 @@ class Program
     {
         CommandHandler commandHandler = new();
 
-        string[] builtinCommands = ["echo", "exit", "type", "pwd"];
+        string[] builtinCommands = ["echo", "exit", "type", "pwd", "cd"];
         string[] standardRedirectOperators = [">", "1>"];
         string[] errorRedirectOperators = ["2>"];
         string[] appendStandardOperators = [">>", "1>>"];
@@ -41,6 +41,9 @@ class Program
                     break;
                 case "pwd":
                     commandOutput = Directory.GetCurrentDirectory();
+                    break;
+                case "cd":
+                    commandOutput = CommandHandler.CDCommand(arguments);
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
