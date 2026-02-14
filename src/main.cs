@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 using System.Xml;
 
@@ -7,7 +8,7 @@ class Program
     {
         CommandHandler commandHandler = new();
 
-        string[] builtinCommands = ["echo", "exit", "type"];
+        string[] builtinCommands = ["echo", "exit", "type", "pwd"];
         string[] standardRedirectOperators = [">", "1>"];
         string[] errorRedirectOperators = ["2>"];
         string[] appendStandardOperators = [">>", "1>>"];
@@ -37,6 +38,9 @@ class Program
                     break;
                 case "type":
                     commandOutput = commandHandler.TypeCommand(arguments.ToArray(), builtinCommands);
+                    break;
+                case "pwd":
+                    commandOutput = Directory.GetCurrentDirectory();
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
