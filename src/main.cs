@@ -32,37 +32,27 @@ class Program
                     return;
                 case "echo":
                     commandOutput = string.Join(" ", arguments[1..]);
-                    commandOutput += "\n";
-
-                    if(appendStandardOutput) 
-                        File.AppendAllText(appendRedirectPath, commandOutput);
-                    else 
-                        OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
-
                     break;
                 case "type":
                     commandOutput = commandHandler.TypeCommand(arguments.ToArray(), builtinCommands);
-                    commandOutput += "\n";
-
-                    if(appendStandardOutput) 
-                        File.AppendAllText(appendRedirectPath, commandOutput);
-                    else 
-                        OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
-
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
-                    commandOutput += "\n";
                     
-                    if(appendStandardOutput) 
-                        File.AppendAllText(appendRedirectPath, commandOutput);
-                    else 
-                        OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
-
-                    OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
                     break;
             }
 
+            // Handle output for all commands
+            if (!string.IsNullOrWhiteSpace(commandOutput))
+            {
+                commandOutput += "\n";
+
+                if (appendStandardOutput)
+                    File.AppendAllText(appendRedirectPath, commandOutput);
+                else
+                    OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+            }
+            OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
         }
     }
 
