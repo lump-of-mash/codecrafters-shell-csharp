@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.Marshalling;
 using System.Xml;
 
 class Program
@@ -9,6 +10,7 @@ class Program
         string[] builtinCommands = ["echo", "exit", "type"];
         string[] standardRedirectOperators = [">", "1>"];
         string[] errorRedirectOperators = ["2>"];
+        string[] appendRedirectOperators = [">>", "1>>"];
         while (true)
         {
             Console.Write("$ ");
@@ -19,25 +21,41 @@ class Program
             List<string> arguments = ParseInput(command);
 
             bool redirectStandardOutput = CheckForRedirect(arguments, standardRedirectOperators, out string standardRedirectPath);
-            bool redirectErrorOutput    = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
+            bool appendStandardOutput = CheckForRedirect(arguments, appendRedirectOperators, out string appendRedirectPath, true);
+            bool redirectErrorOutput = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
 
             string commandOutput = string.Empty;
-            string errorOutput   = string.Empty;
+            string errorOutput = string.Empty;
             switch (arguments[0])
             {
                 case "exit":
                     return;
                 case "echo":
                     commandOutput = string.Join(" ", arguments[1..]);
-                    OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+
+                    if(appendStandardOutput) 
+                        File.AppendAllText(appendRedirectPath, commandOutput);
+                    else 
+                        OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+
                     break;
                 case "type":
                     commandOutput = commandHandler.TypeCommand(arguments.ToArray(), builtinCommands);
-                    OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+
+                    if(appendStandardOutput) 
+                        File.AppendAllText(appendRedirectPath, commandOutput);
+                    else 
+                        OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
-                    OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+
+                    if(appendStandardOutput) 
+                        File.AppendAllText(appendRedirectPath, commandOutput);
+                    else 
+                        OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+
                     OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
                     break;
             }
@@ -55,7 +73,7 @@ class Program
             System.Console.WriteLine(commandOutput.TrimEnd('\n'));
     }
 
-    private static bool CheckForRedirect(List<string> arguments, string[] redirectOperators, out string redirectPath)
+    private static bool CheckForRedirect(List<string> arguments, string[] redirectOperators, out string redirectPath, bool append = false)
     {
         for (int i = 1; i < arguments.Count - 1; i++)
         {
@@ -63,7 +81,12 @@ class Program
             {
                 redirectPath = arguments[i + 1];
                 arguments.RemoveRange(i, arguments.Count - i);
-                File.WriteAllText(redirectPath, null);
+
+                if (append)
+                    File.AppendAllText(redirectPath, null);
+                else
+                    File.WriteAllText(redirectPath, null);
+
                 return true;
             }
         }
