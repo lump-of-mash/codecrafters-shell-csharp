@@ -10,7 +10,8 @@ class Program
         string[] builtinCommands = ["echo", "exit", "type"];
         string[] standardRedirectOperators = [">", "1>"];
         string[] errorRedirectOperators = ["2>"];
-        string[] appendRedirectOperators = [">>", "1>>"];
+        string[] appendStandardOperators = [">>", "1>>"];
+        string[] appendErrorOperators = ["2>>"];
         while (true)
         {
             Console.Write("$ ");
@@ -21,8 +22,9 @@ class Program
             List<string> arguments = ParseInput(command);
 
             bool redirectStandardOutput = CheckForRedirect(arguments, standardRedirectOperators, out string standardRedirectPath);
-            bool appendStandardOutput = CheckForRedirect(arguments, appendRedirectOperators, out string appendRedirectPath, true);
+            bool appendStandardOutput = CheckForRedirect(arguments, appendStandardOperators, out string appendStandardPath, true);
             bool redirectErrorOutput = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
+            bool appendErrorOutput = CheckForRedirect(arguments, appendErrorOperators, out string appendErrorPath, true);
 
             string commandOutput = string.Empty;
             string errorOutput = string.Empty;
@@ -38,7 +40,6 @@ class Program
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
-                    
                     break;
             }
 
@@ -48,11 +49,20 @@ class Program
                 commandOutput += "\n";
 
                 if (appendStandardOutput)
-                    File.AppendAllText(appendRedirectPath, commandOutput);
+                    File.AppendAllText(appendStandardPath, commandOutput);
                 else
                     OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
             }
-            OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
+            if (!string.IsNullOrWhiteSpace(errorOutput))
+            {
+                errorOutput += "\n";
+
+                if (appendErrorOutput)
+                    File.AppendAllText(appendErrorPath, errorOutput);
+                else
+                    OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
+            }
+
         }
     }
 
