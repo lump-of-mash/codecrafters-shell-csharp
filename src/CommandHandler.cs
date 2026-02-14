@@ -4,13 +4,13 @@ using System.Runtime.InteropServices;
 
 internal class CommandHandler
 {
-    internal string ExecuteCommand(string[] arguments, bool errorRedirectOutput, string errordRedirectPath)
+    internal (string output, string error) ExecuteCommand(string[] arguments)
     {
         var fileName = arguments[0];
         var filePath = CheckPathFileIsExecutable(fileName);
         if(filePath == null)
         {
-            return $"{fileName}: command not found";
+            return ($"{fileName}: command not found", string.Empty);
         }
         
         var process = new Process
@@ -20,7 +20,7 @@ internal class CommandHandler
             FileName = fileName,
             UseShellExecute = false,
             RedirectStandardOutput = true,
-            RedirectStandardError = errorRedirectOutput
+            RedirectStandardError = true
             }
         };
         foreach (var arg in arguments[1..])
@@ -30,12 +30,10 @@ internal class CommandHandler
         process.Start();
         
         var output = process.StandardOutput.ReadToEnd();
-
-        if(errorRedirectOutput) 
-            File.WriteAllText(errordRedirectPath, process.StandardError.ReadToEnd());
+        var error = process.StandardError.ReadToEnd();
 
         process.WaitForExit();
-        return output;
+        return (output, error);
     }
 
     private string? CheckPathFileIsExecutable(string fileName)

@@ -22,6 +22,7 @@ class Program
             bool redirectErrorOutput    = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
 
             string commandOutput = string.Empty;
+            string errorOutput   = string.Empty;
             switch (arguments[0])
             {
                 case "exit":
@@ -35,8 +36,9 @@ class Program
                     OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
                     break;
                 default:
-                    commandOutput = commandHandler.ExecuteCommand(arguments.ToArray(), redirectErrorOutput, errordRedirectPath);
+                    (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
                     OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+                    OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
                     break;
             }
 
