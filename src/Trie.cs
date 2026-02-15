@@ -48,6 +48,7 @@ internal class Trie
             currentNode = currentNode.Children[firstChar];
         }
 
+        completeWord += " "; //  trailing space so the user can immediately type arguments
         return true;
     }
 }
