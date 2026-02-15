@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Dynamic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -103,6 +104,10 @@ internal class CommandHandler
 
         if (arguments.Count > 1)
             directory = arguments[1];
+
+        // use home directory for tilde character
+        if (directory == "~")
+            directory =  Environment.GetEnvironmentVariable("HOME") ?? "~";
 
         if (Directory.Exists(directory))
             Directory.SetCurrentDirectory(directory);
