@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
+using System.Text;
 using System.Xml;
 
 class Program
@@ -16,8 +17,8 @@ class Program
         while (true)
         {
             Console.Write("$ ");
-
-            string? command = Console.ReadLine();
+            
+            string? command = AutocompleteCommand(builtinCommands);
             if (string.IsNullOrEmpty(command)) continue;
 
             List<string> arguments = ParseInput(command);
@@ -70,6 +71,44 @@ class Program
 
         }
     }
+
+    private static string AutocompleteCommand(string[] wordsToAutoComplete)
+    {
+        Trie trie = new Trie(wordsToAutoComplete);
+
+        StringBuilder input = new StringBuilder();
+        while(true)
+        {
+            ConsoleKeyInfo key = Console.ReadKey(intercept: true);
+
+            if (key.Key == ConsoleKey.Enter)
+            {
+                break;
+            }
+            else if (key.Key == ConsoleKey.Tab)
+            {
+                if(trie.Autocomplete(input.ToString(), out string completeWord))
+                {
+                    input.Append(completeWord);
+                    Console.Write(completeWord);
+                }
+                    
+            }
+            else if(key.Key == ConsoleKey.Backspace && input.Length > 0)
+            {
+                input.Remove(input.Length -1, 1);
+                Console.Write("\b \b");
+            }
+            else if (!char.IsControl(key.KeyChar))
+            {
+                input.Append(key.KeyChar);
+                Console.Write(key.KeyChar);
+            }
+        }
+        System.Console.WriteLine();
+        return input.ToString();
+    }
+    
 
     private static void OutputCommand(string commandOutput, bool redirectOutput, string redirectPath)
     {
