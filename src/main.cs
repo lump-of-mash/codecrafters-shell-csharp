@@ -77,6 +77,10 @@ class Program
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
         Trie trie = new(wordsToAutoComplete);
 
+        // prinf debugging plz remove
+        foreach(var word in wordsToAutoComplete)
+            System.Console.WriteLine(word);
+
         StringBuilder input = new();
         while (true)
         {
