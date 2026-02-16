@@ -37,10 +37,33 @@ internal class CommandHandler
         return (output, error);
     }
 
-    private string? CheckPathFileIsExecutable(string fileName)
+    public static List<string> GetExecutableFileNames()
+    {
+        List<string> fileNames = [];
+        string path = GetPathDirectories();
+
+        foreach (var dir in path.Split(Path.PathSeparator))
+        {
+            if(!Directory.Exists(dir)) continue;
+            
+            foreach (var filePath in Directory.GetFiles(dir))
+            {
+                if (IsExecutable(filePath))
+                    fileNames.Add(Path.GetFileName(filePath));
+            }
+        }
+        return fileNames;
+    }
+
+    private static string GetPathDirectories()
     {
         string pathVariableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Path" : "PATH";
-        string? path = Environment.GetEnvironmentVariable(pathVariableName) ?? string.Empty;
+        return Environment.GetEnvironmentVariable(pathVariableName) ?? string.Empty;
+    }
+
+    private string? CheckPathFileIsExecutable(string fileName)
+    {
+        string path = GetPathDirectories();
 
         foreach (var dir in path.Split(Path.PathSeparator))
         {
@@ -51,21 +74,21 @@ internal class CommandHandler
         }
 
         return null;
+    }
 
-        static bool IsExecutable(string path)
+    private static bool IsExecutable(string path)
+    {
+        if (!File.Exists(path)) return false;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (!File.Exists(path)) return false;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                string ext = Path.GetExtension(path).ToLowerInvariant();
-                return ext is ".exe" or ".bat" or ".cmd" or ".com";
-            }
-            else
-            {
-                var mode = File.GetUnixFileMode(path);
-                return (mode & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) != 0;
-            }
+            string ext = Path.GetExtension(path).ToLowerInvariant();
+            return ext is ".exe" or ".bat" or ".cmd" or ".com";
+        }
+        else
+        {
+            var mode = File.GetUnixFileMode(path);
+            return (mode & (UnixFileMode.UserExecute | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute)) != 0;
         }
     }
 
@@ -107,7 +130,7 @@ internal class CommandHandler
 
         // use home directory for tilde character
         if (directory == "~")
-            directory =  Environment.GetEnvironmentVariable("HOME") ?? "~";
+            directory = Environment.GetEnvironmentVariable("HOME") ?? "~";
 
         if (Directory.Exists(directory))
             Directory.SetCurrentDirectory(directory);

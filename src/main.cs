@@ -18,7 +18,7 @@ class Program
         {
             Console.Write("$ ");
 
-            string? command = AutocompleteCommand(builtinCommands);
+            string? command = AutocompleteCommand(builtinCommands.ToList());
             if (string.IsNullOrEmpty(command)) continue;
 
             List<string> arguments = ParseInput(command);
@@ -72,11 +72,12 @@ class Program
         }
     }
 
-    private static string AutocompleteCommand(string[] wordsToAutoComplete)
+    private static string AutocompleteCommand(List<string> wordsToAutoComplete)
     {
-        Trie trie = new Trie(wordsToAutoComplete);
+        wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
+        Trie trie = new(wordsToAutoComplete);
 
-        StringBuilder input = new StringBuilder();
+        StringBuilder input = new();
         while (true)
         {
             ConsoleKeyInfo key = Console.ReadKey(intercept: true);

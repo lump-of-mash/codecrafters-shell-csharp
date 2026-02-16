@@ -11,7 +11,7 @@ internal class Trie
         }
     }
     private TrieNode _root;
-    public Trie(string[] words)
+    public Trie(List<string> words)
     {
         _root = new TrieNode();
 
