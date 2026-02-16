@@ -95,7 +95,7 @@ class Program
                 }
                 else
                 {
-                    Console.Write("\x07");
+                    Console.Beep();
                 }
             }
             else if (key.Key == ConsoleKey.Backspace && input.Length > 0)
