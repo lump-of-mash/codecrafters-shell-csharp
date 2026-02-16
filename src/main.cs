@@ -92,6 +92,10 @@ class Program
                     input.Append(completeWord);
                     Console.Write(completeWord);
                 }
+                else
+                {
+                    Console.Write("\x07");
+                }
             }
             else if (key.Key == ConsoleKey.Backspace && input.Length > 0)
             {
