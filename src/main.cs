@@ -17,7 +17,7 @@ class Program
         while (true)
         {
             Console.Write("$ ");
-            
+
             string? command = AutocompleteCommand(builtinCommands);
             if (string.IsNullOrEmpty(command)) continue;
 
@@ -77,7 +77,7 @@ class Program
         Trie trie = new Trie(wordsToAutoComplete);
 
         StringBuilder input = new StringBuilder();
-        while(true)
+        while (true)
         {
             ConsoleKeyInfo key = Console.ReadKey(intercept: true);
 
@@ -87,16 +87,15 @@ class Program
             }
             else if (key.Key == ConsoleKey.Tab)
             {
-                if(trie.Autocomplete(input.ToString(), out string completeWord))
+                if (trie.Autocomplete(input.ToString(), out string completeWord))
                 {
                     input.Append(completeWord);
                     Console.Write(completeWord);
                 }
-                    
             }
-            else if(key.Key == ConsoleKey.Backspace && input.Length > 0)
+            else if (key.Key == ConsoleKey.Backspace && input.Length > 0)
             {
-                input.Remove(input.Length -1, 1);
+                input.Remove(input.Length - 1, 1);
                 Console.Write("\b \b");
             }
             else if (!char.IsControl(key.KeyChar))
@@ -108,7 +107,7 @@ class Program
         System.Console.WriteLine();
         return input.ToString();
     }
-    
+
 
     private static void OutputCommand(string commandOutput, bool redirectOutput, string redirectPath)
     {
