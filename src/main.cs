@@ -75,6 +75,14 @@ class Program
     private static string AutoCompleteCommand(List<string> wordsToAutoComplete)
     {
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
+
+        // debug: print auto-complete words
+        wordsToAutoComplete.Sort();
+        foreach (var word in wordsToAutoComplete)
+        {
+            Console.WriteLine(word);
+        }
+        
         AutoCompletionHandler autoCompletionHandler = new(wordsToAutoComplete);
         ReadLine.AutoCompletionHandler = autoCompletionHandler;
 
