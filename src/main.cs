@@ -18,7 +18,7 @@ class Program
         {
             Console.Write("$ ");
 
-            string? command = AutocompleteCommand(builtinCommands.ToList());
+            string? command = AutoCompleteCommand(builtinCommands.ToList());
             if (string.IsNullOrEmpty(command)) continue;
 
             List<string> arguments = ParseInput(command);
@@ -72,45 +72,13 @@ class Program
         }
     }
 
-    private static string AutocompleteCommand(List<string> wordsToAutoComplete)
+    private static string AutoCompleteCommand(List<string> wordsToAutoComplete)
     {
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
-        Trie trie = new(wordsToAutoComplete);
+        AutoCompletionHandler autoCompletionHandler = new(wordsToAutoComplete);
+        ReadLine.AutoCompletionHandler = autoCompletionHandler;
 
-        StringBuilder input = new();
-        while (true)
-        {
-            ConsoleKeyInfo key = Console.ReadKey(intercept: true);
-
-            if (key.Key == ConsoleKey.Enter)
-            {
-                break;
-            }
-            else if (key.Key == ConsoleKey.Tab)
-            {
-                if (trie.Autocomplete(input.ToString(), out string completeWord))
-                {
-                    input.Append(completeWord);
-                    Console.Write(completeWord);
-                }
-                else
-                {
-                    Console.Write("\a");
-                }
-            }
-            else if (key.Key == ConsoleKey.Backspace && input.Length > 0)
-            {
-                input.Remove(input.Length - 1, 1);
-                Console.Write("\b \b");
-            }
-            else if (!char.IsControl(key.KeyChar))
-            {
-                input.Append(key.KeyChar);
-                Console.Write(key.KeyChar);
-            }
-        }
-        System.Console.WriteLine();
-        return input.ToString();
+        return ReadLine.Read();
     }
 
 
@@ -203,5 +171,18 @@ class Program
         if (currentArgument.Length > 0) arguments.Add(currentArgument);
 
         return arguments;
+    }
+}
+
+internal class AutoCompletionHandler(List<string> autoCompleteWords) : IAutoCompleteHandler
+{
+    public List<string> AutoCompleteWords { get; } = autoCompleteWords;
+    public char[] Separators { get; set; } = [' '];
+
+    public string[] GetSuggestions(string text, int index)
+    {
+        string[] completions = AutoCompleteWords.Where(word => word.StartsWith(text, StringComparison.OrdinalIgnoreCase)).ToArray();
+        if (completions.Length == 0) Console.Write("\a"); // beep sound for no matches
+        return completions;
     }
 }
