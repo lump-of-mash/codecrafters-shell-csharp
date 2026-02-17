@@ -76,16 +76,14 @@ class Program
     {
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
 
-        // debug: print auto-complete words
-        wordsToAutoComplete.Sort();
-        foreach (var word in wordsToAutoComplete)
-        {
-            Console.WriteLine(word);
-        }
         
+
         AutoCompletionHandler autoCompletionHandler = new(wordsToAutoComplete);
         ReadLine.AutoCompletionHandler = autoCompletionHandler;
 
+        // debug: print auto-complete words
+        wordsToAutoComplete.Sort();
+        System.Console.WriteLine("Auto-complete words: " + string.Join(", ", wordsToAutoComplete));
         return ReadLine.Read();
     }
 
