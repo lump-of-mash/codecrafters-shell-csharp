@@ -68,7 +68,6 @@ class Program
                 else
                     OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
             }
-
         }
     }
 
