@@ -89,13 +89,15 @@ class Program
             {
                 if (trie.Autocomplete(input.ToString(), out string suffix))
                 {
-                    var completeWord = input.ToString() + suffix;
-
+                    string completeWord = input.ToString() + suffix;
+                    
                     while(input.Length > 0)
                     {
                         Console.Write("\b \b");
                         input.Remove(input.Length - 1, 1);
-                    } 
+                    }
+                    input.Clear();
+                    
                     input.Append(completeWord);
                     Console.Write(completeWord);
                 }
