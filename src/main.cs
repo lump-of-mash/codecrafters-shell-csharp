@@ -95,7 +95,7 @@ class Program
                 }
                 else
                 {
-                    Console.Beep();
+                    Console.Write("\a");
                 }
             }
             else if (key.Key == ConsoleKey.Backspace && input.Length > 0)
