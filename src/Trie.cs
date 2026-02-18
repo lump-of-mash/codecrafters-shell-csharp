@@ -31,6 +31,12 @@ internal class Trie
     }
     public bool Autocomplete(string prefix, out string completeWord)
     {
+        if(string.IsNullOrEmpty(prefix))
+        {
+            completeWord = "";
+            return false;
+        }
+        
         var currentNode = _root;
         completeWord = "";
         foreach (var ch in prefix)
