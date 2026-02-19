@@ -8,6 +8,7 @@ class Program
     static void Main()
     {
         CommandHandler commandHandler = new();
+        StringBuilder input = new();
 
         string[] builtinCommands = ["echo", "exit", "type", "pwd", "cd"];
         string[] standardRedirectOperators = [">", "1>"];
@@ -18,7 +19,7 @@ class Program
         {
             Console.Write("$ ");
 
-            string? command = AutocompleteCommand(builtinCommands.ToList());
+            string? command = AutocompleteCommand(input, builtinCommands.ToList());
             //string? command = Console.ReadLine();
             if (string.IsNullOrEmpty(command)) continue;
 
@@ -72,11 +73,11 @@ class Program
         }
     }
 
-    private static string AutocompleteCommand(List<string> wordsToAutoComplete)
+    private static string AutocompleteCommand(StringBuilder input, List<string> wordsToAutoComplete)
     {
+        input.Clear();
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
 
-        StringBuilder input = new();
         while (true)
         {
             ConsoleKeyInfo key = Console.ReadKey(intercept: true);
@@ -96,7 +97,7 @@ class Program
                         input.Remove(input.Length - 1, 1);
                     }
                     completeWord += " ";
-                    
+
                     input.Append(completeWord);
                     Console.Write(completeWord);
                 }
