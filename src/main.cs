@@ -78,6 +78,7 @@ class Program
         input.Clear();
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
 
+        bool isFirstTabPress = true;
         ConsoleKeyInfo key;
         do
         {
@@ -85,23 +86,43 @@ class Program
 
             if (key.Key == ConsoleKey.Tab)
             {
-                string? completeWord = wordsToAutoComplete.FirstOrDefault(word => word.StartsWith(input.ToString(), StringComparison.OrdinalIgnoreCase));
-                if (completeWord != null)
+                string[] completeWords = wordsToAutoComplete.Where(w => w.StartsWith(input.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray();
+                Array.Sort(completeWords);
+
+                if (completeWords.Length == 1)
                 {
-                    while(input.Length > 0)
+                    while (input.Length > 0)
                     {
                         Console.Write("\b \b");
                         input.Remove(input.Length - 1, 1);
                     }
-                    completeWord += " ";
+                    var completeWord = completeWords[0] + " ";
 
                     input.Append(completeWord);
                     Console.Write(completeWord);
+                }
+                else if (completeWords.Length > 1)
+                {
+                    if (isFirstTabPress == false)
+                    {
+                        Console.WriteLine();
+                        System.Console.WriteLine(string.Join(" ", completeWords));
+                        Console.Write("$ " + input);
+                    }
+                    else
+                    {
+                        Console.Write("\a");
+                        isFirstTabPress = false;
+                        continue;
+                    }
+
                 }
                 else
                 {
                     Console.Write("\a");
                 }
+
+                isFirstTabPress = true;
             }
             else if (key.Key == ConsoleKey.Backspace && input.Length > 0)
             {
@@ -113,7 +134,8 @@ class Program
                 input.Append(key.KeyChar);
                 Console.Write(key.KeyChar);
             }
-        } while(key.Key != ConsoleKey.Enter);
+        } while (key.Key != ConsoleKey.Enter);
+
         System.Console.WriteLine();
         return input.ToString();
     }
