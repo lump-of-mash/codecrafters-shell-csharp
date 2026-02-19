@@ -78,15 +78,12 @@ class Program
         input.Clear();
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
 
-        while (true)
+        ConsoleKeyInfo key;
+        do
         {
-            ConsoleKeyInfo key = Console.ReadKey(intercept: true);
+            key = Console.ReadKey(intercept: true);
 
-            if (key.Key == ConsoleKey.Enter)
-            {
-                break;
-            }
-            else if (key.Key == ConsoleKey.Tab)
+            if (key.Key == ConsoleKey.Tab)
             {
                 string? completeWord = wordsToAutoComplete.FirstOrDefault(word => word.StartsWith(input.ToString(), StringComparison.OrdinalIgnoreCase));
                 if (completeWord != null)
@@ -116,7 +113,7 @@ class Program
                 input.Append(key.KeyChar);
                 Console.Write(key.KeyChar);
             }
-        }
+        } while(key.Key != ConsoleKey.Enter);
         System.Console.WriteLine();
         return input.ToString();
     }
