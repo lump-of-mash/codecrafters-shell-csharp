@@ -18,7 +18,8 @@ class Program
         {
             Console.Write("$ ");
 
-            string? command = AutocompleteCommand(builtinCommands.ToList());
+            //string? command = AutocompleteCommand(builtinCommands.ToList());
+            string? command = Console.ReadLine();
             if (string.IsNullOrEmpty(command)) continue;
 
             List<string> arguments = ParseInput(command);
