@@ -18,8 +18,8 @@ class Program
         {
             Console.Write("$ ");
 
-            //string? command = AutocompleteCommand(builtinCommands.ToList());
-            string? command = Console.ReadLine();
+            string? command = AutocompleteCommand(builtinCommands.ToList());
+            //string? command = Console.ReadLine();
             if (string.IsNullOrEmpty(command)) continue;
 
             List<string> arguments = ParseInput(command);
@@ -75,7 +75,6 @@ class Program
     private static string AutocompleteCommand(List<string> wordsToAutoComplete)
     {
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
-        Trie trie = new(wordsToAutoComplete);
 
         StringBuilder input = new();
         while (true)
@@ -88,16 +87,15 @@ class Program
             }
             else if (key.Key == ConsoleKey.Tab)
             {
-                if (trie.Autocomplete(input.ToString(), out string suffix))
+                string? completeWord = wordsToAutoComplete.FirstOrDefault(word => word.StartsWith(input.ToString(), StringComparison.OrdinalIgnoreCase));
+                if (completeWord != null)
                 {
-                    string completeWord = input.ToString() + suffix;
-                    
                     while(input.Length > 0)
                     {
                         Console.Write("\b \b");
                         input.Remove(input.Length - 1, 1);
                     }
-                    input.Clear();
+                    completeWord += " ";
                     
                     input.Append(completeWord);
                     Console.Write(completeWord);
