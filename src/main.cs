@@ -3,12 +3,12 @@ using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Xml;
 
-class Program
+partial class Program
 {
     static void Main()
     {
         CommandHandler commandHandler = new();
-        StringBuilder input = new();
+        InputReader inputReader = new();
 
         string[] builtinCommands = ["echo", "exit", "type", "pwd", "cd"];
         string[] standardRedirectOperators = [">", "1>"];
@@ -19,7 +19,7 @@ class Program
         {
             Console.Write("$ ");
 
-            string? command = AutocompleteCommand(input, builtinCommands.ToList());
+            string? command = inputReader.AutocompleteCommand(builtinCommands.ToList());
             //string? command = Console.ReadLine();
             if (string.IsNullOrEmpty(command)) continue;
 
@@ -72,75 +72,7 @@ class Program
             }
         }
     }
-
-    private static string AutocompleteCommand(StringBuilder input, List<string> wordsToAutoComplete)
-    {
-        input.Clear();
-        wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
-
-        bool isFirstTabPress = true;
-        ConsoleKeyInfo key;
-        do
-        {
-            key = Console.ReadKey(intercept: true);
-
-            if (key.Key == ConsoleKey.Tab)
-            {
-                string[] completeWords = wordsToAutoComplete.Where(w => w.StartsWith(input.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray();
-                Array.Sort(completeWords);
-
-                if (completeWords.Length == 1)
-                {
-                    while (input.Length > 0)
-                    {
-                        Console.Write("\b \b");
-                        input.Remove(input.Length - 1, 1);
-                    }
-                    var completeWord = completeWords[0] + " ";
-
-                    input.Append(completeWord);
-                    Console.Write(completeWord);
-                }
-                else if (completeWords.Length > 1)
-                {
-                    if (isFirstTabPress == false)
-                    {
-                        Console.WriteLine();
-                        System.Console.WriteLine(string.Join("  ", completeWords));
-                        Console.Write("$ " + input);
-                    }
-                    else
-                    {
-                        Console.Write("\a");
-                        isFirstTabPress = false;
-                        continue;
-                    }
-
-                }
-                else
-                {
-                    Console.Write("\a");
-                }
-
-                isFirstTabPress = true;
-            }
-            else if (key.Key == ConsoleKey.Backspace && input.Length > 0)
-            {
-                input.Remove(input.Length - 1, 1);
-                Console.Write("\b \b");
-            }
-            else if (!char.IsControl(key.KeyChar))
-            {
-                input.Append(key.KeyChar);
-                Console.Write(key.KeyChar);
-            }
-        } while (key.Key != ConsoleKey.Enter);
-
-        System.Console.WriteLine();
-        return input.ToString();
-    }
-
-
+    
     private static void OutputCommand(string commandOutput, bool redirectOutput, string redirectPath)
     {
         if (string.IsNullOrWhiteSpace(commandOutput)) return;
