@@ -1,10 +1,9 @@
-using System.Text;
 internal class InputReader
 {
-    private readonly StringBuilder _input = new();
+    private string _input = "";
     public string AutocompleteCommand(List<string> wordsToAutoComplete)
     {
-        _input.Clear();
+        _input = "";
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
 
         bool isFirstTabPress = true;
@@ -15,7 +14,7 @@ internal class InputReader
 
             if (key.Key == ConsoleKey.Tab)
             {
-                string[] completeWords = wordsToAutoComplete.Where(w => w.StartsWith(_input.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray();
+                string[] completeWords = wordsToAutoComplete.Where(w => w.StartsWith(_input, StringComparison.OrdinalIgnoreCase)).ToArray();
                 Array.Sort(completeWords);
 
                 if (completeWords.Length == 1)
@@ -23,11 +22,11 @@ internal class InputReader
                     while (_input.Length > 0)
                     {
                         Console.Write("\b \b");
-                        _input.Remove(_input.Length - 1, 1);
+                        _input = _input.Substring(0, _input.Length - 1);
                     }
                     var completeWord = completeWords[0] + " ";
 
-                    _input.Append(completeWord);
+                    _input += completeWord;
                     Console.Write(completeWord);
                 }
                 else if (completeWords.Length > 1)
@@ -55,18 +54,18 @@ internal class InputReader
             }
             else if (key.Key == ConsoleKey.Backspace && _input.Length > 0)
             {
-                _input.Remove(_input.Length - 1, 1);
+                _input = _input.Substring(0, _input.Length - 1);
                 Console.Write("\b \b");
             }
             else if (!char.IsControl(key.KeyChar))
             {
-                _input.Append(key.KeyChar);
+                _input += key.KeyChar;
                 Console.Write(key.KeyChar);
             }
         } while (key.Key != ConsoleKey.Enter);
 
         System.Console.WriteLine();
-        return _input.ToString();
+        return _input;
     }
 }
 
