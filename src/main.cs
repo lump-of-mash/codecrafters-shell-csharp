@@ -106,7 +106,7 @@ class Program
                     if (isFirstTabPress == false)
                     {
                         Console.WriteLine();
-                        System.Console.WriteLine(string.Join(" ", completeWords));
+                        System.Console.WriteLine(string.Join("  ", completeWords));
                         Console.Write("$ " + input);
                     }
                     else
