@@ -15,7 +15,7 @@ partial class Program
         CommandHandler commandHandler = new();
         InputReader inputReader = new();
 
-        string[] builtinCommands = ["echo", "exit", "type", "pwd", "cd"];
+        string[] builtinCommands = ["echo", "exit", "type", "pwd", "cd", "history"];
         string[] standardRedirectOperators = [">", "1>"];
         string[] errorRedirectOperators = ["2>"];
         string[] appendStandardOperators = [">>", "1>>"];
@@ -51,6 +51,8 @@ partial class Program
                     break;
                 case "cd":
                     commandOutput = CommandHandler.CDCommand(arguments);
+                    break;
+                case "history":
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
