@@ -140,9 +140,14 @@ internal class CommandHandler
         return output;
     }
 
-    internal static void HistoryCommand(List<string> history)
+    internal static void HistoryCommand(List<string> history, List<string> arguments)
     {
-        for (int i = 0; i < history.Count; i++)
+        int limit = 0;
+        if(arguments.Count > 1 && int.TryParse(arguments[1], out limit))
+            limit = Math.Max(history.Count - limit, 0);
+
+
+        for (int i = limit; i < history.Count; i++)
         {
             System.Console.WriteLine($"    {i + 1}  {history[i]}");
         }

@@ -57,7 +57,7 @@ partial class Program
                     commandOutput = CommandHandler.CDCommand(arguments);
                     break;
                 case "history":
-                    CommandHandler.HistoryCommand(history);
+                    CommandHandler.HistoryCommand(history, arguments);
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
