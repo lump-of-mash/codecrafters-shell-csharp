@@ -39,11 +39,15 @@ internal class InputReader
                     }
                     else
                     {
-                        Console.Write("\a");
-                        isFirstTabPress = false;
-                        continue;
-                    }
+                        string commonPrefix = GetLongestCommonPrefix(completeWords);
 
+                        if (commonPrefix.Length == 0)
+                        {
+                            Console.Write("\a");
+                            isFirstTabPress = false;
+                            continue;
+                        }
+                    }
                 }
                 else
                 {
@@ -66,6 +70,28 @@ internal class InputReader
 
         System.Console.WriteLine();
         return _input;
+
+        string GetLongestCommonPrefix(string[] completeWords)
+        {
+            var longestWord = completeWords.OrderByDescending(w => w.Length).First();
+            string commonPrefix = "";
+            for (int i = _input.Length; i < longestWord.Length; i++)
+            {
+                char currentChar = longestWord[i];
+                if (completeWords.All(w => w.Length > i && char.ToLower(w[i]) == char.ToLower(currentChar)))
+                    commonPrefix += currentChar;
+                else
+                    break;
+            }
+
+            foreach (var ch in commonPrefix)
+            {
+                Console.Write(ch);
+                _input += ch;
+            }
+
+            return commonPrefix;
+        }
     }
 }
 
