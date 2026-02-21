@@ -44,8 +44,8 @@ internal class CommandHandler
 
         foreach (var dir in path.Split(Path.PathSeparator))
         {
-            if(!Directory.Exists(dir)) continue;
-            
+            if (!Directory.Exists(dir)) continue;
+
             foreach (var filePath in Directory.GetFiles(dir))
             {
                 if (IsExecutable(filePath))
@@ -143,9 +143,23 @@ internal class CommandHandler
     internal static void HistoryCommand(List<string> history, List<string> arguments)
     {
         int limit = 0;
-        if(arguments.Count > 1 && int.TryParse(arguments[1], out limit))
-            limit = Math.Max(history.Count - limit, 0);
 
+        if (arguments.Count > 1)
+        {
+            var secondArgument = arguments[1];
+
+            if (secondArgument == "-r")
+            {
+                if(arguments.Count > 2 && File.Exists(arguments[2]))
+                {
+                    foreach(var line in File.ReadAllLines(arguments[2]))
+                        history.Add(line);
+                }
+                return;
+            }
+            else if (int.TryParse(secondArgument, out limit))
+                limit = Math.Max(history.Count - limit, 0);
+        }
 
         for (int i = limit; i < history.Count; i++)
         {
