@@ -20,15 +20,19 @@ partial class Program
         string[] errorRedirectOperators = ["2>"];
         string[] appendStandardOperators = [">>", "1>>"];
         string[] appendErrorOperators = ["2>>"];
+
+        List<string> history = new();
+
         while (true)
         {
             Console.Write("$ ");
 
             string? command = inputReader.AutocompleteCommand(builtinCommands.ToList());
             if (string.IsNullOrEmpty(command)) continue;
+            history.Add(command);
 
             List<string> arguments = ParseInput(command);
-
+            
             bool redirectStandardOutput = CheckForRedirect(arguments, standardRedirectOperators, out string standardRedirectPath);
             bool appendStandardOutput = CheckForRedirect(arguments, appendStandardOperators, out string appendStandardPath, true);
             bool redirectErrorOutput = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
@@ -53,6 +57,10 @@ partial class Program
                     commandOutput = CommandHandler.CDCommand(arguments);
                     break;
                 case "history":
+                    for(int i = 0; i < history.Count; i++)
+                    {
+                        System.Console.WriteLine($"    {i+1}  {history[i]}");
+                    }
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
