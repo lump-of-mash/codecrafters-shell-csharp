@@ -57,10 +57,7 @@ partial class Program
                     commandOutput = CommandHandler.CDCommand(arguments);
                     break;
                 case "history":
-                    for(int i = 0; i < history.Count; i++)
-                    {
-                        System.Console.WriteLine($"    {i+1}  {history[i]}");
-                    }
+                    CommandHandler.HistoryCommand(history);
                     break;
                 default:
                     (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
@@ -86,7 +83,7 @@ partial class Program
             }
         }
     }
-    
+
     private static void OutputCommand(string commandOutput, bool redirectOutput, string redirectPath)
     {
         if (string.IsNullOrWhiteSpace(commandOutput)) return;

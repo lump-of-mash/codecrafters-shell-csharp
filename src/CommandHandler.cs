@@ -139,4 +139,12 @@ internal class CommandHandler
 
         return output;
     }
+
+    internal static void HistoryCommand(List<string> history)
+    {
+        for (int i = 0; i < history.Count; i++)
+        {
+            System.Console.WriteLine($"    {i + 1}  {history[i]}");
+        }
+    }
 }
