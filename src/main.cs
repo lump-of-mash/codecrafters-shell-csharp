@@ -27,7 +27,7 @@ partial class Program
         {
             Console.Write("$ ");
 
-            string? command = inputReader.AutocompleteCommand(builtinCommands.ToList());
+            string? command = inputReader.AutocompleteCommand(builtinCommands.ToList(), history);
             if (string.IsNullOrEmpty(command)) continue;
             history.Add(command);
 

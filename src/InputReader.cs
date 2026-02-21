@@ -1,11 +1,12 @@
 internal class InputReader
 {
     private string _input = "";
-    public string AutocompleteCommand(List<string> wordsToAutoComplete)
+    public string AutocompleteCommand(List<string> wordsToAutoComplete, List<string> history)
     {
         _input = "";
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
 
+        int currentHistory = history.Count - 1;
         bool isFirstTabPress = true;
         ConsoleKeyInfo key;
         do
@@ -55,6 +56,18 @@ internal class InputReader
                 }
 
                 isFirstTabPress = true;
+            }
+            if (key.Key == ConsoleKey.UpArrow && history.Count > 0)
+            {
+                while (_input.Length > 0)
+                {
+                    Console.Write("\b \b");
+                    _input = _input.Substring(0, _input.Length - 1);
+                }
+
+                _input = history[currentHistory];
+                Console.Write(history[currentHistory]);
+                currentHistory = Math.Max(currentHistory - 1, 0);
             }
             else if (key.Key == ConsoleKey.Backspace && _input.Length > 0)
             {
