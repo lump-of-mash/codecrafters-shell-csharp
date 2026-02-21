@@ -7,6 +7,11 @@ partial class Program
 {
     static void Main()
     {
+        // Disable the PTY's own echo so that characters aren't printed twice:
+        // once by the PTY driver and once by our InputReader's manual echo loop.
+        // This is the root cause of the intermittent double-output seen in tests.
+        TerminalSettings.DisableEcho();
+
         CommandHandler commandHandler = new();
         InputReader inputReader = new();
 
@@ -20,7 +25,6 @@ partial class Program
             Console.Write("$ ");
 
             string? command = inputReader.AutocompleteCommand(builtinCommands.ToList());
-            //string? command = Console.ReadLine();
             if (string.IsNullOrEmpty(command)) continue;
 
             List<string> arguments = ParseInput(command);
@@ -30,7 +34,6 @@ partial class Program
             bool redirectErrorOutput = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
             bool appendErrorOutput = CheckForRedirect(arguments, appendErrorOperators, out string appendErrorPath, true);
 
-            // System.Console.WriteLine($"Arguments: {string.Join(", ", arguments)}");
             string commandOutput = string.Empty;
             string errorOutput = string.Empty;
             switch (arguments[0])
