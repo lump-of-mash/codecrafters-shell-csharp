@@ -14,7 +14,7 @@ internal class InputReader
 
             if (key.Key == ConsoleKey.Tab)
             {
-                string[] completeWords = wordsToAutoComplete.Where(w => w.StartsWith(_input, StringComparison.OrdinalIgnoreCase)).ToArray();
+                string[] completeWords = wordsToAutoComplete.Where(w => w.StartsWith(_input, StringComparison.OrdinalIgnoreCase)).Distinct().ToArray();
                 Array.Sort(completeWords);
 
                 if (completeWords.Length == 1)
