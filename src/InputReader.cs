@@ -6,7 +6,7 @@ internal class InputReader
         _input = "";
         wordsToAutoComplete.AddRange(CommandHandler.GetExecutableFileNames());
 
-        int currentHistory = history.Count - 1;
+        int currentHistory = history.Count;
         bool isFirstTabPress = true;
         ConsoleKeyInfo key;
         do
@@ -57,7 +57,7 @@ internal class InputReader
 
                 isFirstTabPress = true;
             }
-            if (key.Key == ConsoleKey.UpArrow && history.Count > 0)
+            else if (key.Key == ConsoleKey.UpArrow && currentHistory > 0)
             {
                 while (_input.Length > 0)
                 {
@@ -65,9 +65,20 @@ internal class InputReader
                     _input = _input.Substring(0, _input.Length - 1);
                 }
 
-                _input = history[currentHistory];
+                _input = history[--currentHistory];
                 Console.Write(history[currentHistory]);
-                currentHistory = Math.Max(currentHistory - 1, 0);
+                //currentHistory = Math.Max(currentHistory - 1, 0);
+            }
+            else if (key.Key == ConsoleKey.DownArrow && currentHistory < history.Count - 1)
+            {
+                while (_input.Length > 0)
+                {
+                    Console.Write("\b \b");
+                    _input = _input.Substring(0, _input.Length - 1);
+                }
+
+                _input = history[++currentHistory];
+                Console.Write(history[currentHistory]);
             }
             else if (key.Key == ConsoleKey.Backspace && _input.Length > 0)
             {
