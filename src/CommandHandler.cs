@@ -142,28 +142,37 @@ internal class CommandHandler
 
     internal static void HistoryCommand(List<string> history, List<string> arguments)
     {
-        int limit = 0;
-
-        if (arguments.Count > 1)
+        if (HasReplaceFlag(arguments))
         {
-            var secondArgument = arguments[1];
-
-            if (secondArgument == "-r")
-            {
-                if(arguments.Count > 2 && File.Exists(arguments[2]))
-                {
-                    foreach(var line in File.ReadAllLines(arguments[2]))
-                        history.Add(line);
-                }
-                return;
-            }
-            else if (int.TryParse(secondArgument, out limit))
-                limit = Math.Max(history.Count - limit, 0);
+            LoadHistoryFromFile(history, arguments);
+            return;
         }
 
-        for (int i = limit; i < history.Count; i++)
-        {
-            System.Console.WriteLine($"    {i + 1}  {history[i]}");
-        }
+        var startIndex = GetStartIndex(history, arguments);
+        PrintHistory(history, startIndex);
     }
+
+    private static int GetStartIndex(List<string> history, List<string> arguments)
+    {
+        if (arguments.Count > 1 && int.TryParse(arguments[1], out int limit))
+            return Math.Max(history.Count - limit, 0);
+
+        return 0;
+    }
+
+    private static void PrintHistory(List<string> history, int limit)
+    {
+        for (int i = limit; i < history.Count; i++)
+            System.Console.WriteLine($"    {i + 1}  {history[i]}");
+    }
+
+    private static void LoadHistoryFromFile(List<string> history, List<string> arguments)
+    {
+        string? filePath = arguments.Count > 2 ? arguments[2] : null;
+
+        if (arguments.Count > 2 && File.Exists(filePath))
+            history.AddRange(File.ReadAllLines(filePath));
+    }
+
+    private static bool HasReplaceFlag(List<string> arguments) => arguments.Count > 1 && arguments[1] == "-r";
 }
