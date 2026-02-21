@@ -30,7 +30,7 @@ partial class Program
             bool redirectErrorOutput = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
             bool appendErrorOutput = CheckForRedirect(arguments, appendErrorOperators, out string appendErrorPath, true);
 
-            System.Console.WriteLine($"Arguments: {string.Join(", ", arguments)}");
+            // System.Console.WriteLine($"Arguments: {string.Join(", ", arguments)}");
             string commandOutput = string.Empty;
             string errorOutput = string.Empty;
             switch (arguments[0])
