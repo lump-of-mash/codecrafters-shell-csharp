@@ -7,6 +7,7 @@ internal class CommandHandler
 {
     private const string HISTORY_LOAD_FLAG = "-r";
     private const string HISTORY_WRITE_FLAG = "-w";
+    private const string HISTORY_APPEND_FLAG = "-a";
 
     internal (string output, string error) ExecuteCommand(string[] arguments)
     {
@@ -157,9 +158,26 @@ internal class CommandHandler
             return;
         }
 
+        if (HasFlag(arguments, HISTORY_APPEND_FLAG))
+        {
+            AppendHistoryToFile(history, arguments);
+            return;
+        }
+
         var startIndex = GetStartIndex(history, arguments);
         PrintHistory(history, startIndex);
     }
+
+    private static void AppendHistoryToFile(List<string> history, List<string> arguments)
+    {
+        var fileName = arguments.Count > 2 ? arguments[2] : null;
+        if (fileName == null) return;
+
+        var appendFromIndex = FindLastAppendIndex(history);
+        File.AppendAllLines(fileName, history[appendFromIndex..]);
+    }
+
+    private static int FindLastAppendIndex(List<string> history) => history[..^1].FindLastIndex(h => h.Contains($"history {HISTORY_APPEND_FLAG}")) + 1;
 
     private static void WriteHistoryToFile(List<string> history, List<string> arguments)
     {
