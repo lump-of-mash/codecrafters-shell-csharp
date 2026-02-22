@@ -5,6 +5,9 @@ using System.Runtime.InteropServices;
 
 internal class CommandHandler
 {
+    private const string HISTORY_LOAD_FLAG = "-r";
+    private const string HISTORY_WRITE_FLAG = "-w";
+
     internal (string output, string error) ExecuteCommand(string[] arguments)
     {
         var fileName = arguments[0];
@@ -142,15 +145,31 @@ internal class CommandHandler
 
     internal static void HistoryCommand(List<string> history, List<string> arguments)
     {
-        if (HasReplaceFlag(arguments))
+        if (HasFlag(arguments, HISTORY_LOAD_FLAG))
         {
             LoadHistoryFromFile(history, arguments);
+            return;
+        }
+
+        if (HasFlag(arguments, HISTORY_WRITE_FLAG))
+        {
+            WriteHistoryToFile(history, arguments);
             return;
         }
 
         var startIndex = GetStartIndex(history, arguments);
         PrintHistory(history, startIndex);
     }
+
+    private static void WriteHistoryToFile(List<string> history, List<string> arguments)
+    {
+        var fileName = arguments.Count > 2 ? arguments[2] : null;
+
+        if (fileName != null)
+            File.WriteAllLines(fileName, history);
+    }
+
+    private static bool HasFlag(List<string> arguments, string flag) => arguments.Count > 1 && arguments[1] == flag;
 
     private static int GetStartIndex(List<string> history, List<string> arguments)
     {
@@ -170,9 +189,9 @@ internal class CommandHandler
     {
         string? filePath = arguments.Count > 2 ? arguments[2] : null;
 
-        if (arguments.Count > 2 && File.Exists(filePath))
+        if (filePath != null && File.Exists(filePath))
             history.AddRange(File.ReadAllLines(filePath));
     }
 
-    private static bool HasReplaceFlag(List<string> arguments) => arguments.Count > 1 && arguments[1] == "-r";
+
 }
