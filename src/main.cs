@@ -43,6 +43,7 @@ partial class Program
             switch (arguments[0])
             {
                 case "exit":
+                    CommandHandler.SaveHistory(history);
                     return;
                 case "echo":
                     commandOutput = string.Join(" ", arguments[1..]);

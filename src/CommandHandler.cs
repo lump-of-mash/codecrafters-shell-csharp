@@ -218,4 +218,12 @@ internal class CommandHandler
 
         return File.ReadAllLines(filePath).ToList();
     }
+
+    internal static void SaveHistory(List<string> history)
+    {
+        string? filePath = Environment.GetEnvironmentVariable("HISTFILE");
+        if (filePath == null) return;
+
+        File.WriteAllLines(filePath, history);
+    }
 }
