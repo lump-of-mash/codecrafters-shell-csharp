@@ -21,7 +21,7 @@ partial class Program
         string[] appendStandardOperators = [">>", "1>>"];
         string[] appendErrorOperators = ["2>>"];
 
-        List<string> history = new();
+        List<string> history = CommandHandler.LoadHistoryFromHISTFILE();
 
         while (true)
         {

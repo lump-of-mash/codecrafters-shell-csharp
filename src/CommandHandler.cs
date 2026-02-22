@@ -211,5 +211,11 @@ internal class CommandHandler
             history.AddRange(File.ReadAllLines(filePath));
     }
 
+    internal static List<string> LoadHistoryFromHISTFILE()
+    {
+        string? filePath = Environment.GetEnvironmentVariable("HISTFILE");
+        if (filePath == null) return [];
 
+        return File.ReadAllLines(filePath).ToList();
+    }
 }
