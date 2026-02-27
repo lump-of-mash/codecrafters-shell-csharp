@@ -226,4 +226,93 @@ internal class CommandHandler
 
         File.WriteAllLines(filePath, history);
     }
+
+    internal string ExecutePipeline(List<List<string>> commands)
+    {
+        var processes = new List<Process>();
+        var tasks = new List<Task>();
+
+        for (int i = 0; i < commands.Count; i++)
+        {
+            var args = commands[i];
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = args[0],
+                    UseShellExecute = false,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+
+            foreach (var arg in args[1..])
+                process.StartInfo.ArgumentList.Add(arg);
+
+            process.Start();
+            processes.Add(process);
+        }
+
+        // Wire up the pipes concurrently: copy stdout of process[i] into stdin of process[i+1]
+        for (int i = 0; i < processes.Count - 1; i++)
+        {
+            var source = processes[i];
+            var destination = processes[i + 1];
+
+            var task = Task.Run(async () =>
+            {
+                try
+                {
+                    await source.StandardOutput.BaseStream.CopyToAsync(
+                        destination.StandardInput.BaseStream);
+                }
+                catch (IOException) { /* broken pipe is expected when consumer exits early */ }
+                finally
+                {
+                    destination.StandardInput.Close(); // signal EOF to next process
+                }
+            });
+
+            tasks.Add(task);
+        }
+
+        // Close the first process's stdin since it has no predecessor
+        processes[0].StandardInput.Close();
+
+        // Collect output from the last process
+        var lastProcess = processes[^1];
+
+        var stdoutStream = Console.OpenStandardOutput();
+        
+        // Stream stdout to console in real-time
+        var outputTask = Task.Run(async () =>
+        {
+            var buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = await lastProcess.StandardOutput.BaseStream
+                        .ReadAsync(buffer)) > 0)
+            {
+                await stdoutStream.WriteAsync(buffer, 0, bytesRead);
+                await stdoutStream.FlushAsync();
+            }
+        });
+
+        var errorTask = lastProcess.StandardError.ReadToEndAsync();
+
+        // Wait for the last process to finish first
+        lastProcess.WaitForExit();
+
+        // Kill any upstream processes still running (e.g. tail -f)
+        foreach (var process in processes)
+            if (!process.HasExited) process.Kill();
+
+        // Now safe to wait for pipe tasks and remaining processes
+        Task.WaitAll([.. tasks]);
+
+        foreach (var process in processes)
+            process.WaitForExit();
+
+        return errorTask.Result;
+    }
 }

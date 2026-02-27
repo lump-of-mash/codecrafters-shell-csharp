@@ -31,57 +31,73 @@ partial class Program
             if (string.IsNullOrEmpty(command)) continue;
             history.Add(command);
 
-            List<string> arguments = ParseInput(command);
-            
-            bool redirectStandardOutput = CheckForRedirect(arguments, standardRedirectOperators, out string standardRedirectPath);
-            bool appendStandardOutput = CheckForRedirect(arguments, appendStandardOperators, out string appendStandardPath, true);
-            bool redirectErrorOutput = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
-            bool appendErrorOutput = CheckForRedirect(arguments, appendErrorOperators, out string appendErrorPath, true);
+            List<List<string>> commandArguments = ParseInput(command);
 
-            string commandOutput = string.Empty;
-            string errorOutput = string.Empty;
-            switch (arguments[0])
+            // Check if this is a pipeline of external commands
+            bool isPipeline = commandArguments.Count > 1 && commandArguments.All(a => !builtinCommands.Contains(a[0]));
+
+            if (isPipeline)
             {
-                case "exit":
-                    CommandHandler.SaveHistory(history);
-                    return;
-                case "echo":
-                    commandOutput = string.Join(" ", arguments[1..]);
-                    break;
-                case "type":
-                    commandOutput = commandHandler.TypeCommand(arguments.ToArray(), builtinCommands);
-                    break;
-                case "pwd":
-                    commandOutput = Directory.GetCurrentDirectory();
-                    break;
-                case "cd":
-                    commandOutput = CommandHandler.CDCommand(arguments);
-                    break;
-                case "history":
-                    CommandHandler.HistoryCommand(history, arguments);
-                    break;
-                default:
-                    (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
-                    break;
+                var  error = commandHandler.ExecutePipeline(commandArguments);
+                if (!string.IsNullOrWhiteSpace(error)) Console.Error.WriteLine(error.TrimEnd('\n'));
+                continue;
+            }
+            else
+            {
+                var arguments = commandArguments[0];
+                bool redirectStandardOutput = CheckForRedirect(arguments, standardRedirectOperators, out string standardRedirectPath);
+                bool appendStandardOutput = CheckForRedirect(arguments, appendStandardOperators, out string appendStandardPath, true);
+                bool redirectErrorOutput = CheckForRedirect(arguments, errorRedirectOperators, out string errordRedirectPath);
+                bool appendErrorOutput = CheckForRedirect(arguments, appendErrorOperators, out string appendErrorPath, true);
+
+                string commandOutput = string.Empty;
+                string errorOutput = string.Empty;
+                switch (arguments[0])
+                {
+                    case "exit":
+                        CommandHandler.SaveHistory(history);
+                        return;
+                    case "echo":
+                        commandOutput = string.Join(" ", arguments[1..]);
+                        break;
+                    case "type":
+                        commandOutput = commandHandler.TypeCommand(arguments.ToArray(), builtinCommands);
+                        break;
+                    case "pwd":
+                        commandOutput = Directory.GetCurrentDirectory();
+                        break;
+                    case "cd":
+                        commandOutput = CommandHandler.CDCommand(arguments);
+                        break;
+                    case "history":
+                        CommandHandler.HistoryCommand(history, arguments);
+                        break;
+                    default:
+                        (commandOutput, errorOutput) = commandHandler.ExecuteCommand(arguments.ToArray());
+                        break;
+                }
+
+
+                // Handle output for all commands
+                if (!string.IsNullOrWhiteSpace(commandOutput))
+                {
+                    commandOutput += "\n";
+
+                    if (appendStandardOutput)
+                        File.AppendAllText(appendStandardPath, commandOutput);
+                    else
+                        OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
+                }
+                if (!string.IsNullOrWhiteSpace(errorOutput))
+                {
+                    if (appendErrorOutput)
+                        File.AppendAllText(appendErrorPath, errorOutput);
+                    else
+                        OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
+                }
             }
 
-            // Handle output for all commands
-            if (!string.IsNullOrWhiteSpace(commandOutput))
-            {
-                commandOutput += "\n";
 
-                if (appendStandardOutput)
-                    File.AppendAllText(appendStandardPath, commandOutput);
-                else
-                    OutputCommand(commandOutput, redirectStandardOutput, standardRedirectPath);
-            }
-            if (!string.IsNullOrWhiteSpace(errorOutput))
-            {
-                if (appendErrorOutput)
-                    File.AppendAllText(appendErrorPath, errorOutput);
-                else
-                    OutputCommand(errorOutput, redirectErrorOutput, errordRedirectPath);
-            }
         }
     }
 
@@ -117,14 +133,15 @@ partial class Program
         return false;
     }
 
-    static List<string> ParseInput(string input)
+    static List<List<string>> ParseInput(string input)
     {
-        List<string> arguments = [];
+        List<List<string>> commandArguments = [];
 
-        if (string.IsNullOrWhiteSpace(input)) return arguments;
+        if (string.IsNullOrWhiteSpace(input)) return commandArguments;
 
         bool inSingleQuotes = false;
         bool inDoubleQuotes = false;
+        List<string> currentCommand = [];
         string currentArgument = string.Empty;
         bool blackslashEscape = false;
         foreach (var currentChar in input)
@@ -158,11 +175,22 @@ partial class Program
                 continue;
             }
 
+            if (currentChar == '|')
+            {
+                if (currentArgument.Length > 0)
+                    currentCommand.Add(currentArgument);
+
+                commandArguments.Add(currentCommand);
+                currentArgument = string.Empty;
+                currentCommand = [];
+                continue;
+            }
+
             if (currentChar == ' ' && !inSingleQuotes && !inDoubleQuotes)
             {
                 if (currentArgument.Length > 0)
                 {
-                    arguments.Add(currentArgument);
+                    currentCommand.Add(currentArgument);
                     currentArgument = string.Empty;
                 }
             }
@@ -171,8 +199,9 @@ partial class Program
                 currentArgument += currentChar;
             }
         }
-        if (currentArgument.Length > 0) arguments.Add(currentArgument);
+        if (currentArgument.Length > 0) currentCommand.Add(currentArgument);
+        commandArguments.Add(currentCommand);
 
-        return arguments;
+        return commandArguments;
     }
 }
