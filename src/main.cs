@@ -33,13 +33,21 @@ partial class Program
 
             List<List<string>> commandArguments = ParseInput(command);
 
-            // Check if this is a pipeline of external commands
-            bool isPipeline = commandArguments.Count > 1 && commandArguments.All(a => !builtinCommands.Contains(a[0]));
+            bool isPipeline = commandArguments.Count > 1;
 
             if (isPipeline)
             {
-                var  error = commandHandler.ExecutePipeline(commandArguments);
-                if (!string.IsNullOrWhiteSpace(error)) Console.Error.WriteLine(error.TrimEnd('\n'));
+                string? builtinResolver(List<string> args) => args[0] switch
+                {
+                    "echo" => string.Join(" ", args[1..]),
+                    "pwd" => Directory.GetCurrentDirectory(),
+                    "type" => commandHandler.TypeCommand(args.ToArray(), builtinCommands),
+                    _ => null  // not a builtin
+                };
+
+                var error = commandHandler.ExecutePipeline(commandArguments, builtinResolver);
+                if (!string.IsNullOrWhiteSpace(error))
+                    Console.Error.WriteLine(error.TrimEnd('\n'));
                 continue;
             }
             else

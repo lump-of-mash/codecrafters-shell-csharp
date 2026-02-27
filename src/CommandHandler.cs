@@ -227,14 +227,42 @@ internal class CommandHandler
         File.WriteAllLines(filePath, history);
     }
 
-    internal string ExecutePipeline(List<List<string>> commands)
+    internal string ExecutePipeline(List<List<string>> commands, Func<List<string>, string?> builtinResolver)
     {
         var processes = new List<Process>();
         var tasks = new List<Task>();
 
-        for (int i = 0; i < commands.Count; i++)
+        // Resolve a leading builtin (e.g. echo foo | wc)
+        string? initialInput = null;
+        int startIndex = 0;
+        if (builtinResolver(commands[0]) is string builtinOutput)
+        {
+            initialInput = builtinOutput + "\n";
+            startIndex = 1;
+        }
+
+        // Check if the last command is a builtin (e.g. ls | type exit)
+        bool trailingBuiltin = builtinResolver(commands[^1]) != null;
+        int endIndex = trailingBuiltin ? commands.Count - 1 : commands.Count;
+
+        for (int i = startIndex; i < endIndex; i++)
         {
             var args = commands[i];
+
+            // validation before attempting to start
+            if (CheckPathFileIsExecutable(args[0]) == null)
+            {
+                // Kill any processes already started before this one
+                foreach (var p in processes)
+                {
+                    if (!p.HasExited) p.Kill();
+                    p.WaitForExit();
+                }
+                Console.Error.WriteLine($"{args[0]}: command not found");
+                return string.Empty;
+            }
+
+
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -254,7 +282,30 @@ internal class CommandHandler
             processes.Add(process);
         }
 
-        // Wire up the pipes concurrently: copy stdout of process[i] into stdin of process[i+1]
+        if (processes.Count == 0)
+        {
+            // Entire pipeline is builtins - just execute the last one and print
+            var output = builtinResolver(commands[^1]);
+            if (!string.IsNullOrWhiteSpace(output)) Console.WriteLine(output);
+            return string.Empty;
+        }
+
+        // Write leading builtin output into first process's stdin
+        if (initialInput != null)
+        {
+            tasks.Add(Task.Run(async () =>
+            {
+                try { await processes[0].StandardInput.WriteAsync(initialInput); }
+                catch (IOException) { }
+                finally { processes[0].StandardInput.Close(); }
+            }));
+        }
+        else
+        {
+            processes[0].StandardInput.Close();
+        }
+
+        // Wire up pipes between external processes
         for (int i = 0; i < processes.Count - 1; i++)
         {
             var source = processes[i];
@@ -277,15 +328,29 @@ internal class CommandHandler
             tasks.Add(task);
         }
 
-        // Close the first process's stdin since it has no predecessor
-        processes[0].StandardInput.Close();
-
         // Collect output from the last process
         var lastProcess = processes[^1];
 
+        if (trailingBuiltin)
+        {
+            // Read last external process output, pass to builtin (e.g. ls | type exit)
+            // Note: most builtins ignore stdin, so just let the external finish
+            // then execute the builtin normally
+            var externalOutput = lastProcess.StandardOutput.ReadToEnd();
+            lastProcess.WaitForExit();
+
+            foreach (var process in processes)
+                if (!process.HasExited) process.Kill();
+
+            Task.WaitAll([.. tasks]);
+
+            var result = builtinResolver(commands[^1]);
+            if (!string.IsNullOrWhiteSpace(result)) Console.WriteLine(result);
+            return string.Empty;
+        }
+
+        // Stream last process stdout directly to console in real-time
         var stdoutStream = Console.OpenStandardOutput();
-        
-        // Stream stdout to console in real-time
         var outputTask = Task.Run(async () =>
         {
             var buffer = new byte[4096];
